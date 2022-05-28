@@ -3,6 +3,7 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter
+import string
 
 
 def receive():
@@ -11,6 +12,14 @@ def receive():
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
             msg_list.insert(tkinter.END, msg)
+
+            shift = 26-3
+            shift %= 26
+            alphabet = string.ascii_lowercase
+            shifted = alphabet[shift:] + alphabet[:shift]
+            table = str.maketrans(alphabet, shifted)
+            msg = msg.translate(table)
+
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -20,9 +29,18 @@ def send(event=None):  # event is passed by binders.
     msg = my_msg.get()
     my_msg.set("")  # Clears input field.
     client_socket.send(bytes(msg, "utf8"))
+
     if msg == "{quit}":
         client_socket.close()
         top.quit()
+    else:
+        shift = 3
+        shift %= 26
+        alphabet = string.ascii_lowercase
+        shifted = alphabet[shift:] + alphabet[:shift]
+        table = str.maketrans(alphabet, shifted)
+        msg1 = msg.translate(table)
+        print(msg1)
 
 
 def on_closing(event=None):
@@ -33,7 +51,7 @@ def on_closing(event=None):
 top = tkinter.Tk('300x900')
 top.title("Chatter")
 
-messages_frame = tkinter.Frame(top) 
+messages_frame = tkinter.Frame(top)
 my_msg = tkinter.StringVar()  # For the messages to be sent.
 my_msg.set("Type your Name here.")
 scrollbar = tkinter.Scrollbar(messages_frame)  # To navigate through past messages.

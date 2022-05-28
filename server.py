@@ -2,15 +2,16 @@
 """Server for multithreaded (asynchronous) chat application."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
+import string
 
 
 def accept_incoming_connections():
     """Sets up handling for incoming clients."""
     while True:
         client, client_address = SERVER.accept()
-        print("%s:%s has connected." % client_address)
+        #print("%s:%s has connected." % client_address)
         client.send(
-            bytes("Greetings from the cave! Now type your name and press enter!", "utf8"))
+            bytes("Welcome to Abdulaziz Mandeeli chat", "utf8"))
         addresses[client] = client_address
         # print("addresses: ", addresses)
         HANDLE_THREAD = Thread(target=handle_client, args=(client,))
@@ -21,11 +22,13 @@ def handle_client(client):  # Takes client socket as argument.
     """Handles a single client connection."""
 
     name = client.recv(BUFSIZ).decode("utf8")
-    welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % name
+    welcome = 'Welcome %s! type {quit} if you want to exit.' % name
     client.send(bytes(welcome, "utf8"))
     msg = "%s has joined the chat!" % name
     broadcast(bytes(msg, "utf8"))
     clientsNames[client] = name
+
+
 
     while True:
         msg = client.recv(BUFSIZ)
@@ -44,9 +47,10 @@ def broadcast(msg, prefix=""):  # prefix is for name identification.
     # for cl in clients.values():
     # print("All connected clients: ",  cl)
 
-    print("All connected clients: ",  clientsNames.values())
+
+    #print("All connected clients: ",  clientsNames.values())
     for sock in clientsNames:
-        print("sock: ", sock)
+        #print("sock: ", sock)
         sock.send(bytes(prefix, "utf8") + msg)
 
 
